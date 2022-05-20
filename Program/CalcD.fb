@@ -1,0 +1,32 @@
+FUNCTION_BLOCK CalcD
+VAR_INPUT
+	input 			:	REAL;
+	KD				:	REAL;
+	error			:	REAL;
+END_VAR
+
+VAR_OUTPUT
+	output 			:	REAL;
+END_VAR
+
+VAR
+	init			:	BOOL;
+	currentTime		:	DWORD;
+	lastTime		:	DWORD;
+	timeDiff		:	REAL;
+	lastError		:	REAL;
+END_VAR
+
+currenttime := TIME_TO_DWORD(Time());
+timeDiff := DWORD_TO_REAL(currentTime - lastTime);
+
+IF NOT init THEN
+	init := TRUE;
+	lastError := error;
+ELSIF timeDiff > 0.0 THEN
+	output := KD * ((error / lastError) / timeDiff);
+	lastError := error;
+ELSE
+	output := 0.0;
+END_IF
+lastTime := currenttime

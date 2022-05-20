@@ -1,0 +1,30 @@
+FUNCTION_BLOCK pid
+
+VAR_INPUT
+	KP	:	REAL;
+	KI	:	REAL;
+	KD	:	REAL;
+
+	IlimMin		:	REAL; // Lower limit of the integrator
+	IlimMax		:	REAL; // Upper limit of the integrator
+	setPoint	:	REAL;
+	in 			:	REAL;
+END_VAR
+
+VAR_OUTPUT
+	limit		:	BOOL; // Limit of the PID (active/inactive)
+	Y			:	REAL; // Output of the PID
+END_VAR
+
+VAR
+	Dcalc		:	CalcD;
+	Icalc		:	CalcI;
+
+	error		:	REAL;
+END_VAR
+
+error := setPoint - in;
+Icalc(input := in, KI := KI, outMin := IlimMin, outMax := IlimMax, error := error);
+Dcalc(input := in, Kd := KD, error := error);
+
+Y := KP * error + Icalc.output + Dcalc.output;

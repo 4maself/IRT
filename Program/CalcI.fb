@@ -1,0 +1,47 @@
+FUNCTION_BLOCK CalcI
+VAR_INPUT
+	input 		:	REAL;
+	KI			:	REAL;
+	outMin		:	REAL; // Minimum outputvalue
+	outMax		:	REAL; // Maximum outputvalue
+	error		:	REAL;
+END_VAR
+
+VAR_OUTPUT
+	limit		:	BOOL;
+	output 		:	REAL;
+END_VAR
+
+VAR
+	oldValue	:	REAL;
+	init		:	BOOL;
+	currentTime	:	DWORD;
+	lastTime	:	DWORD;
+	timeDiff	:	REAL;
+
+	errorSum	:	REAL;
+END_VAR
+
+currentTime := TIME_TO_DWORD(Time()); // to seconds
+timeDiff := DWORD_TO_REAL(currentTime - lastTime); // Calculate the timedifference between now and last calculation
+// Integrator calculations
+IF NOT init THEN
+	init := TRUE;
+	oldValue := input;
+ELSIF timeDiff > 0.0 THEN
+	errorSum := errorSum + (error * timeDiff);
+	output := KI * errorSum;
+END_IF
+
+IF output > outMax THEN
+	errorSum := outMax * (1/KI);
+	limit := TRUE;
+ELSIF output <= outMin THEN
+	output := outMin;
+	errorSum := outMin * (1/KI);
+	limit := TRUE;
+ELSE
+	limit := FALSE;
+END_IF
+
+lastTime := currentTime;
